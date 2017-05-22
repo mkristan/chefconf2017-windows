@@ -77,3 +77,52 @@ puts "Alternate User from Mixlib::Shellout"
 puts (Mixlib::ShellOut.new('whoami.exe', 
     :user => node['mwwfy']['alternate_user'], 
     :password => node['mwwfy']['alternate_password'])).run_command.stdout
+
+directory "c:\\ChefDemo"
+
+execute 'CMD as another user' do
+    user node['mwwfy']['alternate_user']
+    password node['mwwfy']['alternate_password']
+    command <<-EOH
+        whoami > c:\\ChefDemo\\execute_alternate_creds.txt
+    EOH
+end
+
+ruby_block 'Read the name for execute as another user' do
+  block do
+    puts ""
+    puts File.read("c:\\ChefDemo\\execute_alternate_creds.txt")
+    puts ""
+  end
+  action :run
+end
+    
+
+require 'chef/dsl/powershell'
+cred = ps_credential(node['mwwfy']['alternate_user'], node['mwwfy']['alternate_password'])
+
+# A RESOURCE OF LAST RESORT DOESN'T WORK ACCORDING TO TEACHER
+#powershell_script 'PS as another user' do#
+#    code <<-EOH
+#        get-wmiobject chefconf-29.southcentral.cloudapp.azure.com win32_computersystem -credential (#{cred.to_s.chomp})
+#    EOH
+#end
+
+
+
+dsc_resource 'DSC as another user' do
+    resource :script
+    property :GetScript, '@{}'
+    property :TestScript, '$false'
+    property :SetScript, 'whoami | out-file c:/ChefDemo/dsc_resource_alternate_creds.txt'
+    property :psdscrunascredential, cred
+end
+
+ruby_block 'Read the name for execute as another user' do
+  block do
+    puts ""
+    puts File.read("c:\\ChefDemo\\dsc_resource_alternate_creds.txt")
+    puts ""
+  end
+  action :run
+end
