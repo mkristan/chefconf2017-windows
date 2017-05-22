@@ -4,7 +4,7 @@ maintainer_email 'mkristan@mitre.org'
 license 'apachev2'
 description 'Installs/Configures mwwfy'
 long_description 'Installs/Configures mwwfy'
-version '0.1.0'
+version '0.1.1'
 
 # The `issues_url` points to the location where issues for this cookbook are
 # tracked.  A `View Issues` link will be displayed on this cookbook's page when

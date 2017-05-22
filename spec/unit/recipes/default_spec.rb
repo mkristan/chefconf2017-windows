@@ -20,14 +20,23 @@
 require 'spec_helper'
 
 describe 'mwwfy::default' do
-  context 'When all attributes are default, on an unspecified platform' do
+  context 'When all attributes are default, on the Windows 2012 R2 platform' do
     let(:chef_run) do
-      runner = ChefSpec::ServerRunner.new
+      runner = ChefSpec::ServerRunner.new(platform: 'windows', version: '2012R2')
       runner.converge(described_recipe)
     end
 
     it 'converges successfully' do
       expect { chef_run }.to_not raise_error
+    end
+
+    context 'file[c:\hello.txt]' do
+      it 'sets Read for Everyone' do
+        expect(chef_run).to create_file('c:\hello.txt').with(
+            rights: [{ permissions: :full_control, principals: 'ChefPowerShell' },
+                     { permissions: :read, principals: 'Everyone' }]
+          )
+      end
     end
   end
 end
